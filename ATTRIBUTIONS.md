@@ -8,3 +8,4 @@ If you add new third-party assets or services, extend this list with their requi
 
 Credits:
 Manu
+Namit
