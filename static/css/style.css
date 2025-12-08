@@ -5,5 +5,5 @@ h1,h2,h3,h4,h5,h6{font-family:'Chivo', sans-serif;font-weight:600;}
 #video{background:#000;}
 .list-group-item{background-color:transparent;color:#e9ecef;border-color:rgba(255,255,255,0.08);}
 .list-group-item .btn{padding:0.15rem 0.5rem;}
-.preview-wrap{position:sticky;bottom:0;}
+.preview-wrap{position:sticky;bottom:0;padding: -0.5rem 0rem 0.5rem 0rem }
 .right-pane{padding-bottom:24px;}
