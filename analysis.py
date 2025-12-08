@@ -177,6 +177,7 @@ class AnalysisEngine:
         self.last_pos_value = 0.0
         self.last_hr_method = "none"
         self.hr_smooth = deque(maxlen=5)
+        self.last_mood_label = "Idle"
 
     @staticmethod
     def list_cameras(max_index=5):
@@ -215,24 +216,16 @@ class AnalysisEngine:
         self.rgb_buffer.clear()
         self.hr_history.clear()
         self.pos_history.clear()
-        self.last_hr_bpm = None
         self.last_hr_ts = 0.0
         self.last_pos_value = 0.0
         self.last_hr_method = "none"
         self.latest_frame = None
         with self.lock:
-            self.latest_status = {
+            # retain last mood/hr values; just mark not running
+            self.latest_status.update({
                 "running": False,
-                "mood": {"label": "No face detected"},
-                "hr_bpm": None,
-                "snr": None,
-                "hr_mean": None,
-                "hr_median": None,
-                "hr_mode": None,
-                "last_pos": None,
-                "hr_method": "none",
                 "timestamp": time.time(),
-            }
+            })
 
     def _smooth(self, key, new):
         old = self.smooth_vals[key]
@@ -259,7 +252,7 @@ class AnalysisEngine:
         h, w = frame.shape[:2]
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         result = self.face_mesh.process(rgb)
-        mood_label = "No face detected"
+        mood_label = self.last_mood_label
         hr_bpm = None
         snr_val = None
         roi_box = None
@@ -289,6 +282,7 @@ class AnalysisEngine:
             pitch_s = self._smooth("pitch", pitch)
 
             mood_label = self._mood_from_metrics(pitch_s, lip_s, brow_s, mar_s)
+            self.last_mood_label = mood_label
 
             xs = [p[0] for p in lm]
             ys = [p[1] for p in lm]
@@ -371,7 +365,7 @@ class AnalysisEngine:
             "mood": {
                 "label": mood_label,
             },
-            "hr_bpm": hr_bpm if hr_bpm is not None else (self.last_hr_bpm if (time.time() - self.last_hr_ts) < 8 else self.last_hr_bpm),
+            "hr_bpm": hr_bpm if hr_bpm is not None else (self.last_hr_bpm if self.last_hr_bpm is not None else None),
             "snr": snr_val,
             "hr_mean": statistics.mean(self.hr_history) if self.hr_history else None,
             "hr_median": statistics.median(self.hr_history) if self.hr_history else None,
@@ -381,11 +375,12 @@ class AnalysisEngine:
             "timestamp": time.time(),
         }
 
-        if hr_bpm is not None:
-            cv2.putText(frame, f"HR: {hr_bpm:.1f} bpm", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+        hr_display = hr_bpm if hr_bpm is not None else self.last_hr_bpm
+        if hr_display is not None:
+            cv2.putText(frame, f"HR: {hr_display:.1f} bpm", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
         else:
             cv2.putText(frame, "HR: --", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 200, 255), 2)
-        cv2.putText(frame, f"Mood: {mood_label}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2)
+        cv2.putText(frame, f"Mood: {self.last_mood_label}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2)
 
         return frame, status
 

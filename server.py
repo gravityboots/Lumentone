@@ -2,6 +2,7 @@ import time
 import io
 
 from flask import Flask, jsonify, render_template, request, Response
+from flask import send_from_directory
 
 from analysis import AnalysisEngine
 from data import fetch_tracks, genres_for_state, valence_arousal
@@ -84,6 +85,9 @@ def status():
     })
     return jsonify(state)
 
+@app.route('/assets/<path:filename>')
+def assets(filename):
+    return send_from_directory('assets', filename)
 
 @app.route('/playlist', methods=['POST'])
 def playlist():
