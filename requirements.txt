@@ -1,0 +1,7 @@
+Flask
+requests
+opencv-python
+mediapipe
+numpy
+scipy
+matplotlib

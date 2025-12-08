@@ -1,0 +1,9 @@
+body{font-family:'IBM Plex Mono', monospace;}
+h1,h2,h3,h4,h5,h6{font-family:'Chivo', sans-serif;font-weight:600;}
+.subtitle, p, label, small, .form-label{font-family:'Chivo', sans-serif;font-weight:400;}
+.object-fit-cover{object-fit:cover;}
+#video{background:#000;}
+.list-group-item{background-color:transparent;color:#e9ecef;border-color:rgba(255,255,255,0.08);}
+.list-group-item .btn{padding:0.15rem 0.5rem;}
+.preview-wrap{position:sticky;bottom:0;}
+.right-pane{padding-bottom:24px;}
