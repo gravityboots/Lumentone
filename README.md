@@ -1,4 +1,4 @@
-# Lumentone
+![banner](./assets/banner.png)
 
 Emotion-driven music player and preview web app that reads facial cues, estimates mood/valence/arousal, and builds an iTunes-powered playlist with embedded previews.
 
