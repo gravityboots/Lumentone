@@ -32,6 +32,16 @@ document.addEventListener('DOMContentLoaded', () => {
 	let posPanelOpen = false;
 	let isRunning = false;
 
+	const setDefaultMoodIcon = () => {
+		if (!moodIcon) return;
+		moodIcon.style.backgroundImage = 'linear-gradient(135deg, #a16aff, #4b1c92)';
+		moodIcon.style.webkitMaskImage = "url('/assets/music.svg')";
+		moodIcon.style.maskImage = "url('/assets/music.svg')";
+		if (moodLabel) {
+			moodLabel.style.color = '#adb5bd';
+		}
+	};
+
 	const moodMap = {
 		depressed: { icon: '/assets/depressed.svg', colors: ['#548ce0ff', '#215097ff'] },
 		sad: { icon: '/assets/frown.svg', colors: ['#5fa0ff', '#3f78ff'] },
@@ -45,7 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	};
 
 	const applyMoodDisplay = (label, valence) => {
-		if (!label) return;
+		if (!label) {
+			setDefaultMoodIcon();
+			return;
+		}
 		const key = label.toLowerCase();
 		let entry = moodMap.neutral;
 		if (key.includes('depressed')) entry = moodMap.depressed;
@@ -64,6 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			moodLabel.style.color = entry.colors[1];
 		}
 	};
+
+	setDefaultMoodIcon();
 
 	const updateHr = () => {
 		hrValue.textContent = `${hrRange.value} bpm`;
@@ -199,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				console.error('Playlist error', data.error);
 				moodLabel.textContent = data.mood || '--';
 				vaLabel.textContent = '-- / --';
+				applyMoodDisplay(data.mood, data.valence);
 				// keep genres from status
 				renderPlaylist([]);
 				currentPlaylist = [];
@@ -234,48 +250,43 @@ document.addEventListener('DOMContentLoaded', () => {
 		try {
 			const res = await fetch(`/status?heart_rate=${encodeURIComponent(hrRange.value)}`);
 			const data = await res.json();
-			isRunning = !!data?.running;
-			if (data?.mood?.label) {
+			const running = data?.running === true;
+			isRunning = running;
+			if (running && data?.mood?.label) {
 				moodLabel.textContent = data.mood.label;
 				applyMoodDisplay(data.mood.label, data.valence);
 			}
-			if (data?.valence && data?.arousal) {
+			if (running && data?.valence && data?.arousal) {
 				vaLabel.textContent = `${data.valence} / ${data.arousal}`;
 			}
-			if (data?.genres) {
+			if (running && data?.genres) {
 				renderGenres(data.genres);
 			}
-			if (typeof data?.hr_bpm !== 'undefined') {
-				if (data.hr_bpm) {
-					lastHrBpm = data.hr_bpm;
-					const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
-					const newVal = clamp(data.hr_bpm, parseInt(hrRange.min, 10), parseInt(hrRange.max, 10));
-					hrRange.value = newVal;
-					updateHr();
-				}
-				hrLive.textContent = lastHrBpm ? `${lastHrBpm.toFixed(1)} bpm` : '--';
-				if (hrLiveText) hrLiveText.textContent = lastHrBpm ? `${lastHrBpm.toFixed(1)} bpm` : '--';
+			if (running && typeof data?.hr_bpm === 'number' && !Number.isNaN(data.hr_bpm)) {
+				lastHrBpm = data.hr_bpm;
+				const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+				const newVal = clamp(data.hr_bpm, parseInt(hrRange.min, 10), parseInt(hrRange.max, 10));
+				hrRange.value = newVal;
+				updateHr();
 			}
-			if (typeof data?.hr_mean !== 'undefined') {
-				hrMean.textContent = data.hr_mean ? data.hr_mean.toFixed(1) : '--';
-				hrMedian.textContent = data.hr_median ? data.hr_median.toFixed(1) : '--';
-				hrMode.textContent = data.hr_mode ? data.hr_mode.toFixed(1) : '--';
+			if (running && lastHrBpm !== null) {
+				hrLive.textContent = `${lastHrBpm.toFixed(1)} bpm`;
+				if (hrLiveText) hrLiveText.textContent = `${lastHrBpm.toFixed(1)} bpm`;
 			}
-			if (typeof data?.last_pos !== 'undefined') {
+			if (running && typeof data?.hr_mean === 'number') {
+				hrMean.textContent = data.hr_mean.toFixed(1);
+			}
+			if (running && typeof data?.hr_median === 'number') {
+				hrMedian.textContent = data.hr_median.toFixed(1);
+			}
+			if (running && typeof data?.hr_mode === 'number') {
+				hrMode.textContent = data.hr_mode.toFixed(1);
+			}
+			if (running && typeof data?.last_pos !== 'undefined') {
 				posValue.textContent = typeof data.last_pos === 'number' ? data.last_pos.toFixed(3) : '--';
 			}
-			if (typeof data?.hr_method !== 'undefined' && hrMethod) {
+			if (running && typeof data?.hr_method !== 'undefined' && hrMethod) {
 				hrMethod.textContent = data.hr_method || '--';
-			}
-			if (data?.running === false) {
-				hrLive.textContent = '--';
-				lastHrBpm = null;
-				if (posValue) posValue.textContent = '--';
-				if (hrLiveText) hrLiveText.textContent = '--';
-				if (hrMean) hrMean.textContent = '--';
-				if (hrMedian) hrMedian.textContent = '--';
-				if (hrMode) hrMode.textContent = '--';
-				if (hrMethod) hrMethod.textContent = '--';
 			}
 		} catch (err) {
 			console.error(err);

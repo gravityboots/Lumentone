@@ -36,9 +36,9 @@ MOOD_GENRES: Dict = {
     ("positive", "low"): ["acoustic", "folk", "chill", "singer-songwriter", "ambient"],
     ("neutral", "high"): ["electronic", "synth-pop", "house", "alternative", "hip-hop"],
     ("neutral", "medium"): ["indie", "rock", "indie-pop", "r-n-b", "pop"],
-    ("neutral", "low"): ["jazz", "chill", "ambient", "piano", "sleep", "lo-fi"],
+    ("neutral", "low"): ["jazz", "chill", "ambient", "piano", "sleep", "lo-fi", "classical"],
     ("negative", "high"): ["metal", "hard-rock", "punk", "heavy-metal", "industrial"],
-    ("negative", "medium"): ["trip-hop", "emo", "grunge", "goth", "alternative"],
+    ("negative", "medium"): ["metal","trip-hop", "emo", "grunge", "goth", "alternative"],
     ("negative", "low"): ["sad", "sleep", "piano", "acoustic", "ambient", "lo-fi"],
 }
 
