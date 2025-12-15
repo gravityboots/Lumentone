@@ -15,3 +15,5 @@ Emotion-driven music player and preview web app that reads facial cues, estimate
 - Tracks are fetched from iTunes Search; no API keys required.
 - Camera dropdown queries available devices; rPPG heart rate is derived from the forehead ROI.
 - Spotify env vars in `data.py` are unused in the current iTunes flow.
+
+![app demo screenshot](.assets/demo.png)
